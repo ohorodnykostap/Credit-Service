@@ -5,3 +5,7 @@ asyncpg
 alembic
 python-dotenv
 pydantic-settings
+pandas
+openpyxl
+numpy
+python-multipart
