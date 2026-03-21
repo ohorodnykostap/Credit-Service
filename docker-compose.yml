@@ -19,6 +19,8 @@ services:
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/credit_db
     depends_on:
       - db
+    ports:
+      - "8000:8000"
 
 volumes:
   db_data:
