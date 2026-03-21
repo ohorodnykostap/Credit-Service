@@ -11,6 +11,14 @@ from app.models import User, Credit, Payment, Dictionary, Plan
 
 
 async def seed_data():
+    """
+    Seed the database with initial data from CSV files.
+
+    Creates tables if they do not exist, loads data into Dictionary, User,
+    Credit, Payment, and Plan tables, and skips already populated tables.
+
+    Rolls back the transaction if an error occurs.
+    """
     print("Checking and creating tables...")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -19,6 +27,9 @@ async def seed_data():
     async with AsyncSessionLocal() as session:
         try:
             def read_df(path: str) -> pd.DataFrame:
+                """
+                Read a CSV file into a DataFrame and replace NaN with None.
+                """
                 df = pd.read_csv(path, sep=None, engine="python")
                 return df.replace({np.nan: None})
 
