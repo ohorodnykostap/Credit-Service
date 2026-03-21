@@ -11,10 +11,18 @@ from app.exceptions import (
 
 
 class UserCreditsService:
+    """Service layer for handling user credit operations."""
     def __init__(self, crud: CreditCRUD):
         self.crud = crud
 
     async def get_user_credits_info(self, user_id: int) -> UserCreditsResponseSchema:
+        """
+        Retrieve credit information for a specific user.
+        Builds a response schema with open or closed credits.
+        Raises UserNotFoundError if the user does not exist.
+        :param user_id: ID of the user
+        :return: UserCreditsResponseSchema containing credit details
+        """
         credits_db = await self.crud.get_user_credits(user_id)
 
         if not credits_db:
@@ -60,10 +68,18 @@ class UserCreditsService:
 
 
 class PlanService:
+    """Service layer for handling credit plan operations."""
     def __init__(self, crud: PlanCRUD):
         self.crud = crud
 
     async def process_excel_plans(self, file_contents: bytes):
+        """
+        Process an Excel file containing credit plans.
+        Validates data, checks for duplicates, and inserts plans into the database.
+        Raises PlanValidationError for invalid data.
+        :param file_contents: Raw bytes of the Excel file
+        :return: Number of inserted plans
+        """
         try:
             df = pd.read_excel(io.BytesIO(file_contents))
         except Exception:
@@ -120,6 +136,12 @@ class PlanService:
             raise NoPlansFoundError("There are no plans to insert.")
 
     async def get_plans_performance(self, check_date: date):
+        """
+        Retrieve performance data for plans in a given month.
+        Compares planned vs actual values for issuance and payments.
+        :param check_date: Date within the month to check
+        :return: List of performance reports
+        """
         start_of_month = check_date.replace(day=1)
         plans = await self.crud.get_plans_with_categories_for_month(start_of_month)
 
@@ -152,6 +174,12 @@ class PlanService:
         return report
 
     async def get_year_performance(self, year: int):
+        """
+        Retrieve yearly performance data for issuance and payments.
+        Aggregates monthly statistics and calculates shares and performance percentages.
+        :param year: Year to analyze
+        :return: Dictionary containing year and monthly performance data
+        """
         res_iss_year, res_pay_year = await self.crud.get_year_actual_totals(year)
         total_iss_year = float(res_iss_year or 0)
         total_pay_year = float(res_pay_year or 0)
